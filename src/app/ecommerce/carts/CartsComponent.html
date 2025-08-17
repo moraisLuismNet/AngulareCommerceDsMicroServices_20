@@ -116,9 +116,11 @@
       </div>
     }
 
-    <div *ngIf="!loading && carts.length === 0" class="alert alert-warning">
-      No carts available
-    </div>
+    @if (!loading && carts.length === 0) {
+      <div class="alert alert-warning">
+        No carts available
+      </div>
+    }
 
     <p-confirmDialog></p-confirmDialog>
     <p-dialog
