@@ -55,7 +55,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     nameGroup: '',
     imageGroup: null,
     photo: null,
-    musicGenreId: 0,
+    musicGenreId: null,
     musicGenreName: '',
     musicGenre: '',
   };
@@ -151,6 +151,14 @@ export class GroupsComponent implements OnInit, OnDestroy {
   // Clean up any subscriptions or resources here
 
   save() {
+    // Validate form and music genre selection
+    if (!this.group.musicGenreId) {
+      this.visibleError = true;
+      this.errorMessage = 'Please select a Music Genre';
+      this.cdr.markForCheck();
+      return;
+    }
+
     if (this.group.idGroup === 0) {
       this.groupsService.addGroup(this.group).subscribe({
         next: (data) => {

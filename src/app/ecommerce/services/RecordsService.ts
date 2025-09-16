@@ -120,7 +120,7 @@ export class RecordsService {
   }
 
   addRecord(record: IRecord): Observable<IRecord> {
-    const headers = this.getHeaders();
+    const headers = this.getHeadersForFormData();
     const formData = new FormData();
     formData.append("titleRecord", record.titleRecord);
     if (record.yearOfPublication !== null) {
@@ -153,9 +153,7 @@ export class RecordsService {
   }
 
   updateRecord(record: IRecord): Observable<IRecord> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${this.authGuard.getToken()}`,
-    });
+    const headers = this.getHeadersForFormData();
     const formData = new FormData();
     formData.append("titleRecord", record.titleRecord);
     if (record.yearOfPublication !== null) {
@@ -309,6 +307,13 @@ export class RecordsService {
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+    });
+  }
+
+  getHeadersForFormData(): HttpHeaders {
+    const token = this.authGuard.getToken();
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
     });
   }
 

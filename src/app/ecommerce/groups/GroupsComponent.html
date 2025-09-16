@@ -29,7 +29,7 @@
             Id="genre"
             style="font-size: 0.9rem"
           >
-            <option value="null">Select a Music Genre</option>
+            <option [ngValue]="null">Select a Music Genre</option>
             @for (genre of genres; track genre.idMusicGenre) {
               <option [value]="genre.idMusicGenre">{{ genre.nameMusicGenre }}</option>
             }

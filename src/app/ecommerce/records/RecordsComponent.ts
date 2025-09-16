@@ -286,31 +286,83 @@ export class RecordsComponent implements OnInit, OnDestroy {
   }
 
   save() {
+    // Validate form and group selection
+    if (!this.record.groupId) {
+      this.visibleError = true;
+      this.errorMessage = 'Please select a Group';
+      this.cdr.markForCheck();
+      return;
+    }
+
     if (this.record.idRecord === 0) {
       this.recordsService.addRecord(this.record).subscribe({
         next: (data) => {
           this.visibleError = false;
-          this.form.reset();
+          this.form.reset({
+            idRecord: 0,
+            titleRecord: '',
+            yearOfPublication: null,
+            price: 0,
+            stock: 0,
+            discontinued: false,
+            groupId: null
+          });
+          this.record = {
+            idRecord: 0,
+            titleRecord: '',
+            yearOfPublication: null,
+            imageRecord: null,
+            photo: null,
+            photoName: null,
+            price: 0,
+            stock: 0,
+            discontinued: false,
+            groupId: null,
+            groupName: '',
+            nameGroup: ''
+          };
           this.getRecords();
         },
         error: (err) => {
           console.log(err);
           this.visibleError = true;
           this.controlError(err);
-        },
+        }
       });
     } else {
       this.recordsService.updateRecord(this.record).subscribe({
         next: (data) => {
           this.visibleError = false;
-          this.cancelEdition();
-          this.form.reset();
+          this.form.reset({
+            idRecord: 0,
+            titleRecord: '',
+            yearOfPublication: null,
+            price: 0,
+            stock: 0,
+            discontinued: false,
+            groupId: null
+          });
+          this.record = {
+            idRecord: 0,
+            titleRecord: '',
+            yearOfPublication: null,
+            imageRecord: null,
+            photo: null,
+            photoName: null,
+            price: 0,
+            stock: 0,
+            discontinued: false,
+            groupId: null,
+            groupName: '',
+            nameGroup: ''
+          };
           this.getRecords();
         },
         error: (err) => {
+          console.log(err);
           this.visibleError = true;
           this.controlError(err);
-        },
+        }
       });
     }
   }
