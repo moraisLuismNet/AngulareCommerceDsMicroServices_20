@@ -1,18 +1,27 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, ChangeDetectionStrategy, afterNextRender, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd, RouterModule } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
-import { BadgeModule } from 'primeng/badge';
-import { RippleModule } from 'primeng/ripple';
-import { filter, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  inject,
+  ChangeDetectionStrategy,
+  afterNextRender,
+  DestroyRef,
+} from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router, NavigationEnd, RouterModule } from "@angular/router";
+import { ButtonModule } from "primeng/button";
+import { MenuModule } from "primeng/menu";
+import { BadgeModule } from "primeng/badge";
+import { RippleModule } from "primeng/ripple";
+import { filter, takeUntil } from "rxjs/operators";
+import { Subject } from "rxjs";
 
-import { UserService } from 'src/app/services/UserService';
-import { CartService } from 'src/app/ecommerce/services/CartService';
+import { UserService } from "src/app/services/UserService";
+import { CartService } from "src/app/ecommerce/services/CartService";
 
 @Component({
-  selector: 'app-navbar',
+  selector: "app-navbar",
   standalone: true,
   imports: [
     CommonModule,
@@ -20,10 +29,10 @@ import { CartService } from 'src/app/ecommerce/services/CartService';
     ButtonModule,
     MenuModule,
     BadgeModule,
-    RippleModule
+    RippleModule,
   ],
-  templateUrl: './NavbarComponent.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: "./NavbarComponent.html",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   // Injected services
@@ -31,15 +40,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly cartService = inject(CartService);
   private readonly cdr = inject(ChangeDetectorRef);
-  
+
   // Component state
   emailUser: string | null = null;
   role: string | null = null;
   cartItemsCount = 0;
   cartTotal = 0;
-  currentRoute = '';
+  currentRoute = "";
   cartEnabled = true;
-  
+
   // Private properties
   private destroy$ = new Subject<void>();
   private readonly destroyRef = inject(DestroyRef);
@@ -65,70 +74,92 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // Navigation helper methods
   isAdmin(): boolean {
-    return this.role === 'Admin';
+    return this.role === "Admin";
   }
 
   isListGroupsPage(): boolean {
-    return this.currentRoute.includes('/listgroups') || this.currentRoute === '/';
+    return (
+      this.currentRoute.includes("/listgroups") || this.currentRoute === "/"
+    );
   }
 
   isOrdersPage(): boolean {
-    return this.currentRoute.includes('/admin-orders') || 
-           this.currentRoute.includes('/orders');
+    return (
+      this.currentRoute.includes("/admin-orders") ||
+      this.currentRoute.includes("/orders")
+    );
   }
 
   isGenresPage(): boolean {
-    return this.currentRoute.includes('/genres') || this.currentRoute === '/genres';
+    return (
+      this.currentRoute.includes("/genres") || this.currentRoute === "/genres"
+    );
   }
 
   isGroupsPage(): boolean {
-    return this.currentRoute.includes('/groups') || this.currentRoute === '/groups';
+    return (
+      this.currentRoute.includes("/groups") || this.currentRoute === "/groups"
+    );
   }
 
   isRecordsPage(): boolean {
-    return this.currentRoute.includes('/records') || this.currentRoute === '/records';
+    return (
+      this.currentRoute.includes("/records") || this.currentRoute === "/records"
+    );
   }
 
   isCartsPage(): boolean {
-    return this.currentRoute.includes('/carts') || this.currentRoute === '/carts';
+    return (
+      this.currentRoute.includes("/carts") || this.currentRoute === "/carts"
+    );
   }
 
   isUsersPage(): boolean {
-    return this.currentRoute.includes('/users') || this.currentRoute === '/users';
+    return (
+      this.currentRoute.includes("/users") || this.currentRoute === "/users"
+    );
   }
 
   isLoginPage(): boolean {
-    return this.currentRoute === '/login' || this.currentRoute.includes('/login');
+    return (
+      this.currentRoute === "/login" || this.currentRoute.includes("/login")
+    );
   }
 
   logout(): void {
-    sessionStorage.removeItem('user');
-    sessionStorage.removeItem('role');
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("role");
     this.userService.clearUser();
     this.cartService.resetCart();
-    this.router.navigate(['/login']);
+    this.router.navigate(["/login"]);
   }
 
   // Private methods
   private updateCartEnabledState(): void {
-    const disabledRoutes = ['/login', '/register'];
+    const disabledRoutes = ["/login", "/register"];
     const wasEnabled = this.cartEnabled;
-    this.cartEnabled = !disabledRoutes.some(route => this.currentRoute.startsWith(route));
-    
+    this.cartEnabled = !disabledRoutes.some((route) =>
+      this.currentRoute.startsWith(route)
+    );
+
     if (wasEnabled !== this.cartEnabled) {
       this.cdr.markForCheck();
     }
   }
 
   private setupRouterSubscription(): void {
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      takeUntil(this.destroy$)
-    ).subscribe(event => {
-      this.currentRoute = event.url;
-      this.updateCartEnabledState();
-      this.cdr.markForCheck();
-    });
+    this.router.events
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event) => {
+        this.currentRoute = event.url;
+        this.updateCartEnabledState();
+        this.cdr.markForCheck();
+      });
 
     // Clean up subscriptions when component is destroyed
     this.destroyRef.onDestroy(() => {
@@ -139,7 +170,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateToCart(): void {
     if (this.cartEnabled) {
-      this.router.navigate(['/cart-details']);
+      this.router.navigate(["/cart-details"]);
     }
   }
 
@@ -147,7 +178,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // Subscribe to cart updates
     this.cartService.cartItemCount$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(count => {
+      .subscribe((count) => {
         this.cartItemsCount = count;
         this.cdr.markForCheck();
       });
@@ -155,7 +186,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // Subscribe to cart total updates
     this.cartService.cartTotal$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(total => {
+      .subscribe((total) => {
         this.cartTotal = total;
         this.cdr.markForCheck();
       });
@@ -163,28 +194,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // Subscribe to user email changes
     this.userService.email$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(email => {
+      .subscribe((email) => {
         this.emailUser = email;
         this.cdr.markForCheck();
       });
 
     // Subscribe to user role changes
-    this.userService.role$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(role => {
-        this.role = role;
-        this.cdr.markForCheck();
-      });
-
-    // Subscribe to cart changes
-    this.cartService.cart$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(cartItems => {
-        this.cartItemsCount = cartItems.reduce((total, item) => total + (item.amount || 0), 0);
-        this.cartTotal = cartItems.reduce((total, item) => {
-          return total + ((item.price || 0) * (item.amount || 0));
-        }, 0);
-        this.cdr.markForCheck();
-      });
+    this.userService.role$.pipe(takeUntil(this.destroy$)).subscribe((role) => {
+      this.role = role;
+      this.cdr.markForCheck();
+    });
   }
 }
