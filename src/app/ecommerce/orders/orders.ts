@@ -1,4 +1,10 @@
-import { Component, OnDestroy, afterNextRender, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  afterNextRender,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,21 +18,16 @@ import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 
 // Services
-import { OrderService } from '../services/OrderService';
-import { UserService } from 'src/app/services/UserService';
+import { OrderService } from '../services/order';
+import { UserService } from 'src/app/services/user';
 
 // Interfaces
-import { IOrder } from '../EcommerceInterface';
+import { IOrder } from '../ecommerce.interface';
 
 @Component({
-    selector: 'app-orders',
-    imports: [
-        CommonModule,
-        FormsModule,
-        TableModule,
-        ButtonModule
-    ],
-    templateUrl: './OrdersComponent.html'
+  selector: 'app-orders',
+  imports: [CommonModule, FormsModule, TableModule, ButtonModule],
+  templateUrl: './orders.html',
 })
 export class OrdersComponent implements OnDestroy {
   orders: IOrder[] = [];
@@ -39,7 +40,7 @@ export class OrdersComponent implements OnDestroy {
 
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
-  
+
   private orderService = inject(OrderService);
   private userService = inject(UserService);
   private messageService = inject(MessageService);
@@ -52,16 +53,16 @@ export class OrdersComponent implements OnDestroy {
     });
 
     // Subscribe to email changes
-    this.userService.email$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(email => {
-      if (email) {
-        this.loadOrders(email);
-      } else {
-        this.orders = [];
-        this.filteredOrders = [];
-      }
-    });
+    this.userService.email$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((email) => {
+        if (email) {
+          this.loadOrders(email);
+        } else {
+          this.orders = [];
+          this.filteredOrders = [];
+        }
+      });
   }
 
   private initializeComponent(): void {
@@ -75,7 +76,7 @@ export class OrdersComponent implements OnDestroy {
 
   ngAfterViewInit(): void {
     this.cdr.detectChanges();
-    
+
     // Force change detection
     setTimeout(() => {
       this.cdr.detectChanges();
@@ -86,13 +87,13 @@ export class OrdersComponent implements OnDestroy {
     this.loading = true;
     // Force change detection
     this.cdr.markForCheck();
-    
+
     this.orderService.getOrdersByUserEmail(email).subscribe({
       next: (orders) => {
         try {
           // Create a deep copy of the orders
           const ordersCopy = JSON.parse(JSON.stringify(orders));
-          
+
           // Use setTimeout to ensure it runs in the next detection cycle
           setTimeout(() => {
             this.orders = ordersCopy;
@@ -101,18 +102,17 @@ export class OrdersComponent implements OnDestroy {
             // Force change detection
             this.cdr.markForCheck();
           });
-          
         } catch (error) {
           console.error(' Error processing orders:', error);
           this.loading = false;
           this.orders = [];
           this.filteredOrders = [];
           this.cdr.markForCheck();
-          
+
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Error processing orders. Please try again.'
+            detail: 'Error processing orders. Please try again.',
           });
         }
       },
@@ -120,17 +120,17 @@ export class OrdersComponent implements OnDestroy {
         console.error(' Error loading orders:', {
           error: err,
           status: err?.status,
-          mensaje: err?.message
+          mensaje: err?.message,
         });
-        
+
         this.orders = [];
         this.filteredOrders = [];
         this.loading = false;
-        
+
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error loading orders. Please try again.'
+          detail: 'Error loading orders. Please try again.',
         });
       },
     });

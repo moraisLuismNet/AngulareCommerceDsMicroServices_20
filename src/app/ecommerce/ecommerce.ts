@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
     selector: 'app-ecommerce',
     standalone: true,
     imports: [CommonModule, RouterOutlet],
-    templateUrl: './EcommerceComponent.html',
+    templateUrl: './ecommerce.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EcommerceComponent {

@@ -1,4 +1,10 @@
-import { Component, inject, OnDestroy, afterNextRender, effect } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnDestroy,
+  afterNextRender,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -8,27 +14,22 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 // Services
-import { AppService } from 'src/app/services/AppService';
-import { AuthGuard } from 'src/app/guards/AuthGuardService';
-import { UserService } from 'src/app/services/UserService';
+import { AppService } from 'src/app/services/app';
+import { AuthGuard } from 'src/app/guards/auth-guard';
+import { UserService } from 'src/app/services/user';
 
 // Interfaces
-import { ILogin, ILoginResponse } from 'src/app/interfaces/LoginInterface';
+import { ILogin, ILoginResponse } from 'src/app/interfaces/login.interface';
 
 // Third-party
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
-    selector: 'app-login',
-    imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        ToastModule
-    ],
-    templateUrl: './LoginComponent.html',
-    styleUrls: ['./LoginComponent.css'],
-    providers: [MessageService]
+  selector: 'app-login',
+  imports: [CommonModule, FormsModule, RouterModule, ToastModule],
+  templateUrl: './login.html',
+  styleUrls: ['./login.css'],
+  providers: [MessageService],
 })
 export class LoginComponent implements OnDestroy {
   infoLogin: ILogin = {
@@ -76,21 +77,24 @@ export class LoginComponent implements OnDestroy {
     this.appService.login(this.infoLogin).subscribe({
       next: (data: ILoginResponse) => {
         const decodedToken: any = jwtDecode(data.token);
-        const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        const role =
+          decodedToken[
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+          ];
         const email = this.infoLogin.email;
-        
-        const userData = { 
-          ...data, 
-          role, 
+
+        const userData = {
+          ...data,
+          role,
           email,
-          name: email.split('@')[0] 
+          name: email.split('@')[0],
         };
-        
+
         sessionStorage.setItem('user', JSON.stringify(userData));
-        
+
         this.userService.setEmail(email);
         this.userService.setRole(role);
-        
+
         // Redirect based on role
         this.userService.redirectBasedOnRole();
       },

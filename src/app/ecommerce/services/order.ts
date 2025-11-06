@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { catchError, map, Observable, of, tap } from 'rxjs';
-import { IOrder } from '../EcommerceInterface';
+import { IOrder } from '../ecommerce.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -49,20 +49,20 @@ export class OrderService {
         map((response) => {
           // Handle different possible response formats
           let orders: any[] = [];
-          
+
           if (Array.isArray(response)) {
             // Case 1: Response is already an array of orders
             orders = response;
           } else if (response && typeof response === 'object') {
             // Case 2: Response is an object with $values property
             orders = response.$values || [];
-            
+
             // Case 3: Response is an object with orders directly in it
             if (orders.length === 0 && Object.keys(response).length > 0) {
               orders = Object.values(response);
             }
           }
-          
+
           return orders.map((order: any) => this.normalizeOrder(order));
         }),
         catchError((error) => {
@@ -71,7 +71,7 @@ export class OrderService {
             status: error.status,
             statusText: error.statusText,
             url: error.url,
-            message: error.message
+            message: error.message,
           });
           return of([]);
         })

@@ -8,22 +8,17 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 // Services
-import { AppService } from 'src/app/services/AppService';
+import { AppService } from 'src/app/services/app';
 
 // Interfaces
-import { IRegister } from 'src/app/interfaces/RegisterInterface';
+import { IRegister } from 'src/app/interfaces/register.interface';
 
 @Component({
-    selector: 'app-register',
-    imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        ToastModule
-    ],
-    templateUrl: './RegisterComponent.html',
-    styleUrls: ['./RegisterComponent.css'],
-    providers: [MessageService]
+  selector: 'app-register',
+  imports: [CommonModule, FormsModule, RouterModule, ToastModule],
+  templateUrl: './register.html',
+  styleUrls: ['./register.css'],
+  providers: [MessageService],
 })
 export class RegisterComponent {
   usuario: IRegister = { email: '', password: '' };
@@ -48,7 +43,7 @@ export class RegisterComponent {
 
   onSubmit(form: any) {
     if (!form) return;
-    
+
     if (form.valid) {
       this.appService.register(this.usuario).subscribe({
         next: () => {

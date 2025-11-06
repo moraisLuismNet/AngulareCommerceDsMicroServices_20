@@ -1,4 +1,13 @@
-import { Component, ViewChild, ElementRef, OnDestroy, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,27 +20,27 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 
 // Services
-import { GroupsService } from '../services/GroupsService';
-import { GenresService } from '../services/GenresService';
+import { GroupsService } from '../services/groups';
+import { GenresService } from '../services/genres';
 
 // Interfaces
-import { IGroup } from '../EcommerceInterface';
+import { IGroup } from '../ecommerce.interface';
 
 @Component({
-    selector: 'app-listgroups',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        TableModule,
-        ButtonModule,
-        DialogModule,
-        ConfirmDialogModule,
-        // Shared components are already standalone
-    ],
-    templateUrl: './ListgroupsComponent.html',
-    providers: [ConfirmationService]
+  selector: 'app-listgroups',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    ConfirmDialogModule,
+    // Shared components are already standalone
+  ],
+  templateUrl: './list-groups.html',
+  providers: [ConfirmationService],
 })
 export class ListgroupsComponent implements OnInit, OnDestroy {
   @ViewChild('navbar', { static: false }) navbar: any; // Using 'any' type to avoid circular dependency
@@ -65,7 +74,6 @@ export class ListgroupsComponent implements OnInit, OnDestroy {
   private confirmationService = inject(ConfirmationService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-
 
   ngOnInit(): void {
     this.getGroups();
@@ -147,7 +155,6 @@ export class ListgroupsComponent implements OnInit, OnDestroy {
         return groupName.includes(searchText);
       });
       this.cdr.markForCheck(); // Trigger change detection after filtering
-      
     } catch (error) {
       console.error('Error filtering groups:', error);
       this.filteredGroups = [];

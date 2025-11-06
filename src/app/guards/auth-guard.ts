@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ILoginResponse } from '../interfaces/LoginInterface';
+import { ILoginResponse } from '../interfaces/login.interface';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
@@ -66,30 +66,33 @@ export class AuthGuard {
 
     try {
       const decodedToken: any = jwtDecode(token);
-      
+
       // Try different possible claim names for cart ID
-      const cartId = decodedToken['CartId'] || 
-                    decodedToken['cartId'] || 
-                    decodedToken['cartid'] || 
-                    decodedToken['cart_id'] ||
-                    decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
-      
+      const cartId =
+        decodedToken['CartId'] ||
+        decodedToken['cartId'] ||
+        decodedToken['cartid'] ||
+        decodedToken['cart_id'] ||
+        decodedToken[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+        ];
+
       if (cartId === undefined || cartId === null) {
         return null;
       }
-      
+
       // Convert to number if it's a string
-      const cartIdNum = typeof cartId === 'string' ? parseInt(cartId, 10) : Number(cartId);
-      
+      const cartIdNum =
+        typeof cartId === 'string' ? parseInt(cartId, 10) : Number(cartId);
+
       if (isNaN(cartIdNum)) {
         console.warn('Cart ID is not a valid number:', cartId);
         return null;
       }
-      
+
       // Store in session storage for future use
       sessionStorage.setItem('cartId', cartIdNum.toString());
       return cartIdNum;
-      
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;

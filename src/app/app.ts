@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { NavbarComponent } from './shared/navbar/NavbarComponent';
+import { NavbarComponent } from './shared/navbar/navbar';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     RouterOutlet,
     ToastModule,
     ConfirmDialogModule,

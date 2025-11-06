@@ -1,4 +1,12 @@
-import { Component, OnInit, OnDestroy, effect, ChangeDetectorRef, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  effect,
+  ChangeDetectorRef,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -13,30 +21,30 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Services
-import { UserService } from 'src/app/services/UserService';
-import { CartService } from '../services/CartService';
+import { UserService } from 'src/app/services/user';
+import { CartService } from '../services/cart';
 
 // Interfaces
-import { ICart } from '../EcommerceInterface';
+import { ICart } from '../ecommerce.interface';
 
 @Component({
-    selector: 'app-carts',
-    standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        TableModule,
-        ButtonModule,
-        TooltipModule,
-        DialogModule,
-        ConfirmDialogModule,
-        InputTextModule,
-        ProgressSpinnerModule
-    ],
-    templateUrl: './CartsComponent.html',
-    styleUrls: ['./CartsComponent.css']
+  selector: 'app-carts',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    TableModule,
+    ButtonModule,
+    TooltipModule,
+    DialogModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    ProgressSpinnerModule,
+  ],
+  templateUrl: './carts.html',
+  styleUrls: ['./carts.css'],
 })
 export class CartsComponent implements OnInit, OnDestroy {
   carts: ICart[] = [];
@@ -62,18 +70,20 @@ export class CartsComponent implements OnInit, OnDestroy {
 
   loadCarts(): void {
     this.loading = true;
-    
+
     const handleResponse = (data: any, isAdmin: boolean) => {
       try {
         if (isAdmin) {
           // For admin, handle the array of carts
           const receivedCarts = data.$values || data;
-          this.carts = Array.isArray(receivedCarts) ? receivedCarts : [receivedCarts];
+          this.carts = Array.isArray(receivedCarts)
+            ? receivedCarts
+            : [receivedCarts];
         } else {
           // For regular users, expect a single cart
           this.carts = Array.isArray(data) ? data : [data];
         }
-        
+
         this.filteredCarts = [...this.carts];
       } catch (error) {
         console.error('Error processing cart data:', error);
@@ -89,7 +99,9 @@ export class CartsComponent implements OnInit, OnDestroy {
       // Use setTimeout to defer the error handling
       setTimeout(() => {
         console.error('Error:', error);
-        this.errorMessage = isAdmin ? 'Error loading carts' : 'Error loading your cart';
+        this.errorMessage = isAdmin
+          ? 'Error loading carts'
+          : 'Error loading your cart';
         this.visibleError = true;
         this.loading = false;
         this.cdr.markForCheck(); // Mark for check after error
@@ -99,7 +111,7 @@ export class CartsComponent implements OnInit, OnDestroy {
     if (this.isAdmin) {
       this.cartService.getAllCarts().subscribe({
         next: (data: any) => handleResponse(data, true),
-        error: (error) => handleError(error, true)
+        error: (error) => handleError(error, true),
       });
     } else {
       const userEmail = this.userService.email;
@@ -113,7 +125,7 @@ export class CartsComponent implements OnInit, OnDestroy {
 
       this.cartService.getCart(userEmail).subscribe({
         next: (data) => handleResponse(data, false),
-        error: (error) => handleError(error, false)
+        error: (error) => handleError(error, false),
       });
     }
   }
@@ -164,7 +176,7 @@ export class CartsComponent implements OnInit, OnDestroy {
                 enabled: enable,
                 totalPrice: enable ? this.carts[cartIndex].totalPrice : 0,
               },
-              ...this.carts.slice(cartIndex + 1)
+              ...this.carts.slice(cartIndex + 1),
             ];
             this.filterCarts(); // Refresh the filtered list
           }

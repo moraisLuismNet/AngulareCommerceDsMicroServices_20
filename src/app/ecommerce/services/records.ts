@@ -1,13 +1,21 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable, tap, map, catchError, throwError, of, switchMap } from "rxjs";
-import { environment } from "src/environments/environment";
-import { AuthGuard } from "src/app/guards/AuthGuardService";
-import { IRecord } from "../EcommerceInterface";
-import { StockService } from "./StockService";
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {
+  Observable,
+  tap,
+  map,
+  catchError,
+  throwError,
+  of,
+  switchMap,
+} from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { AuthGuard } from 'src/app/guards/auth-guard';
+import { IRecord } from '../ecommerce.interface';
+import { StockService } from './stock';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class RecordsService {
   private readonly baseUrl = environment.apiUrl.cdService;
@@ -23,7 +31,7 @@ export class RecordsService {
       map((response) => {
         // Handle different response formats
         let records: any[] = [];
-        
+
         if (Array.isArray(response)) {
           // Response is already an array
           records = response;
@@ -31,29 +39,32 @@ export class RecordsService {
           // Response has $values property
           if (Array.isArray(response.$values)) {
             records = response.$values;
-          } 
+          }
           // Response is an object with records as direct properties
           else if (Object.keys(response).length > 0) {
             records = Object.values(response);
           }
         }
-        
+
         // Process records and update stock service
-        return records.map(record => {
+        return records.map((record) => {
           const stock = typeof record.stock === 'number' ? record.stock : 0;
           // Update stock in the stock service
           this.stockService.updateStock(record.idRecord, stock);
-          
+
           return {
             ...record,
-            stock: stock
+            stock: stock,
           };
         });
       }),
       tap((records) => {
         if (records.length > 0) {
           records.forEach((record) => {
-            this.stockService.notifyStockUpdate(record.idRecord, record.stock || 0);
+            this.stockService.notifyStockUpdate(
+              record.idRecord,
+              record.stock || 0
+            );
           });
         } else {
           console.log('[RecordsService] No records found');
@@ -65,7 +76,7 @@ export class RecordsService {
           status: error.status,
           statusText: error.statusText,
           url: error.url,
-          message: error.message
+          message: error.message,
         });
         return of([]);
       })
@@ -75,45 +86,58 @@ export class RecordsService {
   getRecordById(id: number): Observable<IRecord> {
     const headers = this.getHeaders();
     const url = `${this.baseUrl}records/${id}`;
-    
+
     return this.http.get<IRecord>(url, { headers }).pipe(
       switchMap((record: IRecord) => {
         if (record.groupName || record.nameGroup) {
           console.log(`[RecordsService] Record ${id} already has group name:`, {
             groupId: record.groupId,
             groupName: record.groupName,
-            nameGroup: record.nameGroup
+            nameGroup: record.nameGroup,
           });
           return of(record);
         }
-        
+
         // If it doesn't have a group name but it does have a groupId, we search for the group
         if (record.groupId) {
           const groupUrl = `${this.baseUrl}groups/${record.groupId}`;
-          return this.http.get<{nameGroup?: string; groupName?: string}>(groupUrl, { headers }).pipe(
-            map(groupResponse => {
-              const groupName = groupResponse?.nameGroup || groupResponse?.groupName || 'Sin grupo';
-              return {
-                ...record,
-                groupName: groupName,
-                nameGroup: groupName
-              } as IRecord;
-            }),
-            catchError(groupError => {
-              console.error(`[RecordsService] Error getting group for record ${id}:`, groupError);
-              return of({
-                ...record,
-                groupName: 'Error cargando grupo',
-                nameGroup: 'Error cargando grupo'
-              } as IRecord);
+          return this.http
+            .get<{ nameGroup?: string; groupName?: string }>(groupUrl, {
+              headers,
             })
-          );
+            .pipe(
+              map((groupResponse) => {
+                const groupName =
+                  groupResponse?.nameGroup ||
+                  groupResponse?.groupName ||
+                  'Sin grupo';
+                return {
+                  ...record,
+                  groupName: groupName,
+                  nameGroup: groupName,
+                } as IRecord;
+              }),
+              catchError((groupError) => {
+                console.error(
+                  `[RecordsService] Error getting group for record ${id}:`,
+                  groupError
+                );
+                return of({
+                  ...record,
+                  groupName: 'Error cargando grupo',
+                  nameGroup: 'Error cargando grupo',
+                } as IRecord);
+              })
+            );
         }
-        
+
         return of(record);
       }),
       catchError((error: any) => {
-        console.error(`[RecordsService] Error getting record with id ${id}:`, error);
+        console.error(
+          `[RecordsService] Error getting record with id ${id}:`,
+          error
+        );
         return throwError(() => error);
       })
     );
@@ -122,17 +146,17 @@ export class RecordsService {
   addRecord(record: IRecord): Observable<IRecord> {
     const headers = this.getHeadersForFormData();
     const formData = new FormData();
-    formData.append("titleRecord", record.titleRecord);
+    formData.append('titleRecord', record.titleRecord);
     if (record.yearOfPublication !== null) {
-      formData.append("yearOfPublication", record.yearOfPublication.toString());
+      formData.append('yearOfPublication', record.yearOfPublication.toString());
     } else {
-      formData.append("yearOfPublication", "");
+      formData.append('yearOfPublication', '');
     }
-    formData.append("photo", record.photo!);
-    formData.append("price", record.price.toString());
-    formData.append("stock", record.stock.toString());
-    formData.append("discontinued", record.discontinued ? "true" : "false");
-    formData.append("groupId", record.groupId?.toString()!);
+    formData.append('photo', record.photo!);
+    formData.append('price', record.price.toString());
+    formData.append('stock', record.stock.toString());
+    formData.append('discontinued', record.discontinued ? 'true' : 'false');
+    formData.append('groupId', record.groupId?.toString()!);
 
     return this.http
       .post<any>(`${this.baseUrl}records`, formData, {
@@ -155,19 +179,19 @@ export class RecordsService {
   updateRecord(record: IRecord): Observable<IRecord> {
     const headers = this.getHeadersForFormData();
     const formData = new FormData();
-    formData.append("titleRecord", record.titleRecord);
+    formData.append('titleRecord', record.titleRecord);
     if (record.yearOfPublication !== null) {
-      formData.append("yearOfPublication", record.yearOfPublication.toString());
+      formData.append('yearOfPublication', record.yearOfPublication.toString());
     } else {
-      formData.append("yearOfPublication", "");
+      formData.append('yearOfPublication', '');
     }
-    formData.append("price", record.price.toString());
-    formData.append("stock", record.stock.toString());
-    formData.append("discontinued", record.discontinued ? "true" : "false");
-    formData.append("groupId", record.groupId?.toString()!);
+    formData.append('price', record.price.toString());
+    formData.append('stock', record.stock.toString());
+    formData.append('discontinued', record.discontinued ? 'true' : 'false');
+    formData.append('groupId', record.groupId?.toString()!);
 
     if (record.photo) {
-      formData.append("photo", record.photo);
+      formData.append('photo', record.photo);
     }
 
     return this.http
@@ -209,7 +233,7 @@ export class RecordsService {
       .pipe(
         map((response) => {
           let records: IRecord[];
-          let groupName = "";
+          let groupName = '';
           // Handle direct record array response
           if (Array.isArray(response)) {
             records = response;
@@ -221,22 +245,22 @@ export class RecordsService {
           // Handle records nested in group response
           else if (
             response &&
-            typeof response === "object" &&
+            typeof response === 'object' &&
             response.records
           ) {
             if (Array.isArray(response.records)) {
               records = response.records;
             } else if (response.records.$values) {
               records = response.records.$values;
-            } else if (typeof response.records === "object") {
+            } else if (typeof response.records === 'object') {
               records = Object.values(response.records).filter(
                 (val): val is IRecord => {
-                  if (!val || typeof val !== "object") return false;
+                  if (!val || typeof val !== 'object') return false;
                   const v = val as any;
                   return (
-                    typeof v.idRecord === "number" &&
-                    typeof v.titleRecord === "string" &&
-                    typeof v.stock === "number"
+                    typeof v.idRecord === 'number' &&
+                    typeof v.titleRecord === 'string' &&
+                    typeof v.stock === 'number'
                   );
                 }
               );
@@ -247,21 +271,21 @@ export class RecordsService {
           // Handle single record response
           else if (
             response &&
-            typeof response === "object" &&
-            "idRecord" in response
+            typeof response === 'object' &&
+            'idRecord' in response
           ) {
             records = [response];
           }
           // Handle other object responses
-          else if (response && typeof response === "object") {
+          else if (response && typeof response === 'object') {
             const values = Object.values(response);
             records = values.filter((val): val is IRecord => {
-              if (!val || typeof val !== "object") return false;
+              if (!val || typeof val !== 'object') return false;
               const v = val as any;
               return (
-                typeof v.idRecord === "number" &&
-                typeof v.titleRecord === "string" &&
-                typeof v.stock === "number"
+                typeof v.idRecord === 'number' &&
+                typeof v.titleRecord === 'string' &&
+                typeof v.stock === 'number'
               );
             });
           }
@@ -275,7 +299,7 @@ export class RecordsService {
             groupName = response.nameGroup;
           } else if (
             response &&
-            typeof response === "object" &&
+            typeof response === 'object' &&
             response.group &&
             response.group.nameGroup
           ) {
@@ -284,7 +308,7 @@ export class RecordsService {
 
           // Assign the group name to each record
           records.forEach((record) => {
-            record.groupName = groupName || "";
+            record.groupName = groupName || '';
           });
 
           return records;
@@ -306,7 +330,7 @@ export class RecordsService {
     const token = this.authGuard.getToken();
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     });
   }
 
@@ -329,11 +353,16 @@ export class RecordsService {
       )
       .pipe(
         tap(() => {
-          console.log(`[RecordsService] Stock decremented for record ${idRecord}`);
+          console.log(
+            `[RecordsService] Stock decremented for record ${idRecord}`
+          );
           this.stockService.notifyStockUpdate(idRecord, amount);
         }),
         catchError((error) => {
-          console.error(`[RecordsService] Error decrementing stock for record ${idRecord}:`, error);
+          console.error(
+            `[RecordsService] Error decrementing stock for record ${idRecord}:`,
+            error
+          );
           return throwError(() => error);
         })
       );
@@ -351,11 +380,16 @@ export class RecordsService {
       )
       .pipe(
         tap(() => {
-          console.log(`[RecordsService] Stock incremented for record ${idRecord}`);
+          console.log(
+            `[RecordsService] Stock incremented for record ${idRecord}`
+          );
           this.stockService.notifyStockUpdate(idRecord, amount);
         }),
         catchError((error) => {
-          console.error(`[RecordsService] Error incrementing stock for record ${idRecord}:`, error);
+          console.error(
+            `[RecordsService] Error incrementing stock for record ${idRecord}:`,
+            error
+          );
           return throwError(() => error);
         })
       );

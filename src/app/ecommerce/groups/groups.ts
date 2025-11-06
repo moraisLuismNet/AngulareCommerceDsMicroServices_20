@@ -1,4 +1,13 @@
-import { Component, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  ChangeDetectorRef,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 
@@ -12,27 +21,27 @@ import { ConfirmationService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 
 // Services
-import { GroupsService } from '../services/GroupsService';
-import { GenresService } from '../services/GenresService';
+import { GroupsService } from '../services/groups';
+import { GenresService } from '../services/genres';
 
 // Interfaces
-import { IGroup } from '../EcommerceInterface';
+import { IGroup } from '../ecommerce.interface';
 
 @Component({
-    selector: 'app-groups',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ButtonModule,
-        TableModule,
-        InputTextModule,
-        DialogModule,
-        ConfirmDialogModule,
-        TooltipModule
-    ],
-    templateUrl: './GroupsComponent.html',
-    providers: [ConfirmationService]
+  selector: 'app-groups',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    TableModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialogModule,
+    TooltipModule,
+  ],
+  templateUrl: './groups.html',
+  providers: [ConfirmationService],
 })
 export class GroupsComponent implements OnInit, OnDestroy {
   @ViewChild('form') form!: NgForm;
@@ -65,15 +74,16 @@ export class GroupsComponent implements OnInit, OnDestroy {
   private groupsService = inject(GroupsService);
   private genresService = inject(GenresService);
   private confirmationService = inject(ConfirmationService);
-  
+
   constructor() {}
 
   ngOnInit(): void {
     this.getGroups();
-    this.getGenres().then(() => {
-    }).catch(err => {
-      console.error('Failed to load genres:', err);
-    });
+    this.getGenres()
+      .then(() => {})
+      .catch((err) => {
+        console.error('Failed to load genres:', err);
+      });
   }
 
   getGroups() {
@@ -107,16 +117,16 @@ export class GroupsComponent implements OnInit, OnDestroy {
           } else if (data && data.data && Array.isArray(data.data)) {
             genresArray = data.data;
           }
-          
+
           this.genres = genresArray;
           this.genresLoaded = true;
-          
+
           // If there was a pending edit, process it now
           if (this.pendingEditGroup) {
             this.processEdit(this.pendingEditGroup);
             this.pendingEditGroup = null;
           }
-          
+
           this.cdr.detectChanges();
           resolve();
         },
@@ -136,9 +146,10 @@ export class GroupsComponent implements OnInit, OnDestroy {
       this.filteredGroups = [...this.groups];
     } else {
       const searchTerm = this.searchText.toLowerCase().trim();
-      this.filteredGroups = this.groups.filter(group => 
-        group.nameGroup?.toLowerCase().includes(searchTerm) ||
-        group.musicGenreName?.toLowerCase().includes(searchTerm)
+      this.filteredGroups = this.groups.filter(
+        (group) =>
+          group.nameGroup?.toLowerCase().includes(searchTerm) ||
+          group.musicGenreName?.toLowerCase().includes(searchTerm)
       );
     }
     this.cdr.markForCheck(); // Trigger change detection after filtering
@@ -201,23 +212,25 @@ export class GroupsComponent implements OnInit, OnDestroy {
       }
       return;
     }
-    
+
     this.processEdit(group);
   }
-  
+
   private processEdit(group: IGroup) {
     // Create a deep copy of the group to avoid reference issues
     this.group = { ...group };
-    
+
     // Set the photo name if image exists
     this.group.photoName = group.imageGroup
       ? this.extractNameImage(group.imageGroup)
       : '';
-    
+
     // Make sure musicGenreId is set to the correct value
     if (group.musicGenreId && this.genres.length > 0) {
       // Verify the genre exists in our list
-      const foundGenre = this.genres.find(g => g.idMusicGenre === group.musicGenreId);
+      const foundGenre = this.genres.find(
+        (g) => g.idMusicGenre === group.musicGenreId
+      );
       if (foundGenre) {
         this.group.musicGenreId = foundGenre.idMusicGenre;
         this.group.musicGenreName = foundGenre.nameMusicGenre;
@@ -239,13 +252,15 @@ export class GroupsComponent implements OnInit, OnDestroy {
     // Force change detection to update the view
     this.cdr.detectChanges();
   }
-  
+
   private tryFindGenreByName(group: IGroup) {
     if (group.musicGenreName) {
-      const foundGenre = this.genres.find(g => 
-        g.nameMusicGenre?.toLowerCase() === group.musicGenreName?.toLowerCase()
+      const foundGenre = this.genres.find(
+        (g) =>
+          g.nameMusicGenre?.toLowerCase() ===
+          group.musicGenreName?.toLowerCase()
       );
-      
+
       if (foundGenre) {
         this.group.musicGenreId = foundGenre.idMusicGenre;
         this.group.musicGenreName = foundGenre.nameMusicGenre;

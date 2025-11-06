@@ -1,4 +1,12 @@
-import { Component, ViewChild, OnDestroy, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 
@@ -11,33 +19,33 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 
 // Services
-import { GenresService } from '../services/GenresService';
+import { GenresService } from '../services/genres';
 
 // Interfaces
-import { IGenre } from '../EcommerceInterface';
+import { IGenre } from '../ecommerce.interface';
 
 @Component({
-    selector: 'app-genres',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ButtonModule,
-        TableModule,
-        InputTextModule,
-        DialogModule,
-        ConfirmDialogModule
-    ],
-    templateUrl: './GenresComponent.html',
-    providers: [ConfirmationService]
+  selector: 'app-genres',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    TableModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialogModule,
+  ],
+  templateUrl: './genres.html',
+  providers: [ConfirmationService],
 })
 export class GenresComponent implements OnInit, OnDestroy {
   @ViewChild('form') form!: NgForm;
-  
+
   private genresService = inject(GenresService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
-  
+
   constructor() {}
 
   ngOnInit(): void {
@@ -61,7 +69,7 @@ export class GenresComponent implements OnInit, OnDestroy {
     this.genresService.getGenres().subscribe({
       next: (data: any) => {
         this.visibleError = false;
-        
+
         // Check if data is an array or has a $values property
         if (Array.isArray(data)) {
           this.genres = data;
@@ -72,7 +80,7 @@ export class GenresComponent implements OnInit, OnDestroy {
           console.warn('Unexpected data format:', data);
           this.genres = [];
         }
-        
+
         this.filteredGenres = [...this.genres];
         this.cdr.markForCheck(); // Trigger change detection
       },

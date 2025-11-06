@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, Observable, of, tap } from 'rxjs';
-import { IUser } from '../EcommerceInterface';
+import { IUser } from '../ecommerce.interface';
 import { environment } from 'src/environments/environment';
-import { AuthGuard } from '../../guards/AuthGuardService';
+import { AuthGuard } from '../../guards/auth-guard';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +29,7 @@ export class UsersService {
       map((response) => {
         // Handle different response formats
         let usersArray: any[] = [];
-        
+
         if (Array.isArray(response)) {
           // Response is already an array of users
           usersArray = response;
@@ -37,16 +37,16 @@ export class UsersService {
           // Response has $values property
           if (Array.isArray(response.$values)) {
             usersArray = response.$values;
-          } 
+          }
           // Response is an object with users as direct properties
           else if (Object.keys(response).length > 0) {
             usersArray = Object.values(response);
           }
         }
-        
+
         return usersArray as IUser[];
       }),
-      tap(users => {
+      tap((users) => {
         if (users.length > 0) {
         } else {
           console.warn('[UsersService] No users found in the response');
@@ -57,7 +57,7 @@ export class UsersService {
           status: error.status,
           statusText: error.statusText,
           url: error.url,
-          error: error.error
+          error: error.error,
         });
         return of([]);
       })

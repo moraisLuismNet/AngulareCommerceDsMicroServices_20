@@ -7,27 +7,27 @@ import {
   ChangeDetectorRef,
   inject,
   ChangeDetectionStrategy,
-} from "@angular/core";
-import { CommonModule, DecimalPipe } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { Subject, of } from "rxjs";
-import { takeUntil, filter, map, catchError, tap } from "rxjs/operators";
-import { RouterModule, ActivatedRoute } from "@angular/router";
+} from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subject, of } from 'rxjs';
+import { takeUntil, filter, map, catchError, tap } from 'rxjs/operators';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 
 // PrimeNG Modules
-import { TableModule } from "primeng/table";
-import { ButtonModule } from "primeng/button";
-import { InputNumberModule } from "primeng/inputnumber";
-import { ConfirmDialogModule } from "primeng/confirmdialog";
-import { ConfirmationService, MessageService } from "primeng/api";
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 // Services
-import { ICartDetail, IRecord } from "../EcommerceInterface";
-import { AuthGuard } from "src/app/guards/AuthGuardService";
-import { UserService } from "src/app/services/UserService";
-import { CartDetailService } from "../services/CartDetailService";
-import { CartService } from "src/app/ecommerce/services/CartService";
-import { OrderService } from "../services/OrderService";
+import { ICartDetail, IRecord } from '../ecommerce.interface';
+import { AuthGuard } from 'src/app/guards/auth-guard';
+import { UserService } from 'src/app/services/user';
+import { CartDetailService } from '../services/cart-detail';
+import { CartService } from 'src/app/ecommerce/services/cart';
+import { OrderService } from '../services/order';
 
 interface CartDetailItem {
   idCartDetail: number;
@@ -59,10 +59,10 @@ interface ExtendedCartDetail extends ICartDetail {
 }
 
 @Component({
-  selector: "app-cart-details",
+  selector: 'app-cart-details',
   standalone: true,
-  templateUrl: "./CartDetailsComponent.html",
-  styleUrls: ["./CartDetailsComponent.css"],
+  templateUrl: './cart-details.html',
+  styleUrls: ['./cart-details.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
@@ -79,15 +79,15 @@ interface ExtendedCartDetail extends ICartDetail {
 export class CartDetailsComponent implements OnInit, OnDestroy {
   cartDetails: ICartDetail[] = [];
   filteredCartDetails: ExtendedCartDetail[] = [];
-  emailUser: string | null = "";
+  emailUser: string | null = '';
   loading = false;
   isAddingToCart = false;
   private readonly destroy$ = new Subject<void>();
-  currentViewedEmail: string = "";
+  currentViewedEmail: string = '';
   isViewingAsAdmin: boolean = false;
   isCreatingOrder = false;
-  alertMessage: string = "";
-  alertType: "success" | "error" | null = null;
+  alertMessage: string = '';
+  alertType: 'success' | 'error' | null = null;
 
   private readonly cartDetailService = inject(CartDetailService);
   private readonly route = inject(ActivatedRoute);
@@ -113,7 +113,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
     effect(() => {
       const email = this.userService.email;
       const hasViewingParam =
-        this.route.snapshot.queryParams["viewingUserEmail"];
+        this.route.snapshot.queryParams['viewingUserEmail'];
 
       if (email && !hasViewingParam && !this.isViewingAsAdmin) {
         this.currentViewedEmail = email;
@@ -126,7 +126,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {
-        const viewingUserEmail = params["viewingUserEmail"];
+        const viewingUserEmail = params['viewingUserEmail'];
 
         if (viewingUserEmail) {
           // Always use the viewingUserEmail parameter when provided
@@ -149,7 +149,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
 
   // Method to extract the group name from several possible locations
   private extractGroupName(detail: any): string {
-    if (!detail) return "N/A";
+    if (!detail) return 'N/A';
 
     // List of possible group name locations
     const possibleGroupPaths = [
@@ -172,23 +172,23 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
       (name) =>
         name !== undefined &&
         name !== null &&
-        name !== "" &&
-        name !== "N/A" &&
-        name !== "string"
+        name !== '' &&
+        name !== 'N/A' &&
+        name !== 'string'
     );
 
     // Clean up the group name if it contains HTML entities or extra spaces
-    if (typeof groupName === "string") {
+    if (typeof groupName === 'string') {
       // Remove HTML entities and trim
       const cleanName = groupName
-        .replace(/&[^;]+;/g, "") // Remove HTML entities
-        .replace(/\s+/g, " ") // Replace multiple spaces with single space
+        .replace(/&[^;]+;/g, '') // Remove HTML entities
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim();
 
-      return cleanName || "N/A";
+      return cleanName || 'N/A';
     }
 
-    return "N/A";
+    return 'N/A';
   }
 
   private loadCartDetails(email: string): void {
@@ -235,13 +235,13 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
             details = response.$values;
           }
           // Handle plain object with numeric keys
-          else if (typeof response === "object") {
+          else if (typeof response === 'object') {
             details = Object.values(response);
           }
 
           // Filter out any invalid items and map to expected format
           return details
-            .filter((detail: any) => detail && typeof detail === "object")
+            .filter((detail: any) => detail && typeof detail === 'object')
             .map((detail: any) => {
               // Extract group information from various possible locations
               const groupName = this.extractGroupName(detail);
@@ -249,11 +249,11 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
                 detail.titleRecord ||
                 detail.recordTitle ||
                 detail.record?.titleRecord ||
-                "No Title";
+                'No Title';
               const imageUrl =
                 detail.imageRecord ||
                 detail.record?.imageRecord ||
-                "assets/img/placeholder.png";
+                'assets/img/placeholder.png';
               const price = detail.price || detail.record?.price || 0;
               const amount = detail.amount || 0;
 
@@ -274,10 +274,10 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
             });
         }),
         catchError((error) => {
-          console.error("Error loading cart details:", error);
+          console.error('Error loading cart details:', error);
           // Only show error if not a 404 (which might just mean the cart is empty)
           if (error.status !== 404) {
-            console.error("Failed to load cart details", error);
+            console.error('Failed to load cart details', error);
           }
           return of([]);
         })
@@ -312,7 +312,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error("Error in cart details subscription:", error);
+          console.error('Error in cart details subscription:', error);
           this.loading = false;
           this.cartDetails = [];
           this.filteredCartDetails = [];
@@ -371,11 +371,11 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
               const title =
                 record.titleRecord ||
                 this.filteredCartDetails[index].titleRecord ||
-                "No Title";
+                'No Title';
               const imageUrl =
                 record.imageRecord ||
                 this.filteredCartDetails[index].imageRecord ||
-                "assets/img/placeholder.png";
+                'assets/img/placeholder.png';
               const price =
                 record.price || this.filteredCartDetails[index].price || 0;
               const amount = this.filteredCartDetails[index].amount || 0;
@@ -436,7 +436,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
     return this.cartDetails
       .filter(
         (detail) =>
-          detail && typeof detail.amount === "number" && detail.amount > 0
+          detail && typeof detail.amount === 'number' && detail.amount > 0
       )
       .map((detail) => {
         // Create a new object with all properties from detail
@@ -448,17 +448,17 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
         extendedDetail.amount = detail.amount || 0;
         extendedDetail.cartId = detail.cartId || 0;
         extendedDetail.titleRecord =
-          detail.titleRecord || detail.recordTitle || "No Title";
-        extendedDetail.groupName = detail.groupName || "N/A";
+          detail.titleRecord || detail.recordTitle || 'No Title';
+        extendedDetail.groupName = detail.groupName || 'N/A';
         extendedDetail.imageRecord =
-          detail.imageRecord || "assets/img/placeholder.png";
+          detail.imageRecord || 'assets/img/placeholder.png';
         extendedDetail.price = detail.price || 0;
         extendedDetail.total = detail.total || 0;
         extendedDetail.stock = detail.stock || 0;
 
         // Backward compatibility
         extendedDetail.recordTitle =
-          detail.recordTitle || detail.titleRecord || "No Title";
+          detail.recordTitle || detail.titleRecord || 'No Title';
 
         // Handle the record property separately to avoid type issues
         if (detail.record) {
@@ -513,10 +513,10 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.showAlert("Product added to cart", "success");
+      this.showAlert('Product added to cart', 'success');
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      this.showAlert("Failed to add product to cart", "error");
+      console.error('Error adding to cart:', error);
+      this.showAlert('Failed to add product to cart', 'error');
       // Revert local changes if it fails
       const itemIndex = this.filteredCartDetails.findIndex(
         (d) => d.recordId === detail.recordId
@@ -573,10 +573,10 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.showAlert("Product removed from cart", "success");
+      this.showAlert('Product removed from cart', 'success');
     } catch (error) {
-      console.error("Error removing from cart:", error);
-      this.showAlert("Failed to remove product from cart", "error");
+      console.error('Error removing from cart:', error);
+      this.showAlert('Failed to remove product from cart', 'error');
       // On error, reload the cart from server to ensure UI is in sync with backend
       await this.loadCartDetails(this.currentViewedEmail);
       // Sync CartService even on error to maintain consistency
@@ -608,26 +608,26 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
     this.clearAlert();
 
     try {
-      const paymentMethod = "credit-card";
+      const paymentMethod = 'credit-card';
       const order = await this.orderService
         .createOrderFromCart(this.currentViewedEmail, paymentMethod)
         .toPromise();
 
-      this.showAlert("Order created successfully", "success");
+      this.showAlert('Order created successfully', 'success');
       await this.loadCartDetails(this.currentViewedEmail);
       // Sync CartService with backend to ensure cart state is reset after order
       this.cartService.syncCartWithBackend(this.currentViewedEmail);
       this.cartService.updateCartNavbar(0, 0);
     } catch (error: any) {
-      console.error("Full error:", error);
-      const errorMsg = error.error?.message || "Failed to create order";
-      this.showAlert(errorMsg, "error");
+      console.error('Full error:', error);
+      const errorMsg = error.error?.message || 'Failed to create order';
+      this.showAlert(errorMsg, 'error');
     } finally {
       this.isCreatingOrder = false;
     }
   }
 
-  private showAlert(message: string, type: "success" | "error"): void {
+  private showAlert(message: string, type: 'success' | 'error'): void {
     this.alertMessage = message;
     this.alertType = type;
 
@@ -636,7 +636,7 @@ export class CartDetailsComponent implements OnInit, OnDestroy {
   }
 
   private clearAlert(): void {
-    this.alertMessage = "";
+    this.alertMessage = '';
     this.alertType = null;
   }
 }

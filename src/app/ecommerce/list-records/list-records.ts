@@ -1,66 +1,74 @@
-import { Component, OnDestroy, ViewChild, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
+import {
+  Component,
+  OnDestroy,
+  ViewChild,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 // RxJS
-import { Subject, of, throwError } from "rxjs";
+import { Subject, of, throwError } from 'rxjs';
 import {
   takeUntil,
   finalize,
   switchMap,
   map,
   catchError,
-  tap
-} from "rxjs/operators";
+  tap,
+} from 'rxjs/operators';
 
 // PrimeNG Modules
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from "primeng/api";
+import { ConfirmationService } from 'primeng/api';
 
 // Services
-import { RecordsService } from "../services/RecordsService";
-import { GroupsService } from "../services/GroupsService";
-import { CartService } from "src/app/ecommerce/services/CartService";
-import { CartDetailService } from "../services/CartDetailService";
-import { UserService } from "src/app/services/UserService";
-import { StockService } from "../services/StockService";
-import { AuthGuard } from "src/app/guards/AuthGuardService";
+import { RecordsService } from '../services/records';
+import { GroupsService } from '../services/groups';
+import { CartService } from 'src/app/ecommerce/services/cart';
+import { CartDetailService } from '../services/cart-detail';
+import { UserService } from 'src/app/services/user';
+import { StockService } from '../services/stock';
+import { AuthGuard } from 'src/app/guards/auth-guard';
 
 // Interfaces
-import { IRecord } from "../EcommerceInterface";
+import { IRecord } from '../ecommerce.interface';
 
 @Component({
-    selector: "app-listrecords",
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        TableModule,
-        ButtonModule,
-        DialogModule,
-        ConfirmDialogModule,
-        // Shared components are already standalone
-    ],
-    templateUrl: "./ListrecordsComponent.html",
-    providers: [ConfirmationService]
+  selector: 'app-listrecords',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    ConfirmDialogModule,
+    // Shared components are already standalone
+  ],
+  templateUrl: './list-records.html',
+  providers: [ConfirmationService],
 })
 export class ListrecordsComponent implements OnInit, OnDestroy {
   @ViewChild('navbar', { static: false }) navbar: any; // Using 'any' type to avoid circular dependency
   records: IRecord[] = [];
   filteredRecords: IRecord[] = [];
-  searchText: string = "";
+  searchText: string = '';
   cart: IRecord[] = [];
   groupId: string | null = null;
-  groupName: string = "";
-  errorMessage: string = "";
+  groupName: string = '';
+  errorMessage: string = '';
   visibleError: boolean = false;
   visiblePhoto: boolean = false;
-  photo: string = "";
+  photo: string = '';
   cartItemsCount: number = 0;
   isAddingToCart = false;
   private readonly destroy$ = new Subject<void>();
@@ -69,7 +77,7 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
 
   record: IRecord = {
     idRecord: 0,
-    titleRecord: "",
+    titleRecord: '',
     yearOfPublication: null,
     imageRecord: null,
     photo: null,
@@ -78,8 +86,8 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
     stock: 0,
     discontinued: false,
     groupId: null,
-    groupName: "",
-    nameGroup: "",
+    groupName: '',
+    nameGroup: '',
   };
   userEmail: string | null = null;
 
@@ -99,12 +107,12 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const idGroup = params.get("idGroup");
+      const idGroup = params.get('idGroup');
       if (idGroup) {
         this.groupId = idGroup;
         this.loadRecords(idGroup);
       } else {
-        this.errorMessage = "No group ID provided";
+        this.errorMessage = 'No group ID provided';
         this.visibleError = true;
       }
     });
@@ -120,7 +128,7 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
   checkCartStatus() {
     // Enable cart by default
     this.cartEnabled = true;
-    
+
     // If no user email, we can't check the cart status
     if (!this.userEmail) {
       return;
@@ -134,7 +142,7 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck(); // Trigger change detection
       },
       error: (error) => {
-        console.error("Error checking cart status:", error);
+        console.error('Error checking cart status:', error);
         // On error, keep the cart enabled by default
         this.cartEnabled = true;
         this.cdr.markForCheck(); // Trigger change detection
@@ -177,21 +185,17 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((update) => {
         if (!update) return;
-        
+
         const { recordId, newStock } = update;
-        
+
         // Update records array
-        this.records = this.records.map((record) => 
-          record.idRecord === recordId 
-            ? { ...record, stock: newStock }
-            : record
+        this.records = this.records.map((record) =>
+          record.idRecord === recordId ? { ...record, stock: newStock } : record
         );
-        
+
         // Update filtered records
-        this.filteredRecords = this.filteredRecords.map((record) => 
-          record.idRecord === recordId 
-            ? { ...record, stock: newStock }
-            : record
+        this.filteredRecords = this.filteredRecords.map((record) =>
+          record.idRecord === recordId ? { ...record, stock: newStock } : record
         );
       });
 
@@ -212,18 +216,18 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
 
   confirm(): void {
     this.confirmationService.confirm({
-      message: "Are you sure you want to continue?",
+      message: 'Are you sure you want to continue?',
       accept: () => {},
     });
   }
 
   isLoggedIn(): boolean {
-    return !!sessionStorage.getItem("user");
+    return !!sessionStorage.getItem('user');
   }
 
   loadRecords(idGroup: string): void {
     this.loading = true;
-    this.errorMessage = "";
+    this.errorMessage = '';
     this.visibleError = false;
 
     // First we synchronize the cart with the backend
@@ -241,7 +245,7 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
         tap((records: IRecord[]) => {
           // Initialize stock values in the stock service
           if (records && records.length > 0) {
-            records.forEach(record => {
+            records.forEach((record) => {
               if (record.idRecord && typeof record.stock === 'number') {
                 this.stockService.updateStock(record.idRecord, record.stock);
               }
@@ -250,7 +254,7 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
         }),
         switchMap((records: IRecord[]) => {
           if (!records || records.length === 0) {
-            this.errorMessage = "No records found for this group";
+            this.errorMessage = 'No records found for this group';
             this.visibleError = true;
             return of([]);
           }
@@ -289,8 +293,8 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck(); // Trigger change detection after loading records
         },
         error: (error) => {
-          console.error("Error loading records:", error);
-          this.errorMessage = "Error loading records";
+          console.error('Error loading records:', error);
+          this.errorMessage = 'Error loading records';
           this.visibleError = true;
           this.cdr.markForCheck(); // Trigger change detection on error
         },
@@ -306,8 +310,8 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
           this.groupName = nameGroup;
         },
         error: (error) => {
-          console.error("Error loading group name:", error);
-          this.errorMessage = "Error loading group name";
+          console.error('Error loading group name:', error);
+          this.errorMessage = 'Error loading group name';
           this.visibleError = true;
         },
       });
@@ -356,22 +360,18 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
     }
 
     this.isAddingToCart = true;
-    this.errorMessage = "";
+    this.errorMessage = '';
     this.visibleError = false;
 
     // Update stock locally first for immediate response
-    const updatedRecords = this.records.map(r => 
-      r.idRecord === record.idRecord 
-        ? { ...r, stock: r.stock - 1 } 
-        : r
+    const updatedRecords = this.records.map((r) =>
+      r.idRecord === record.idRecord ? { ...r, stock: r.stock - 1 } : r
     );
-    
-    const updatedFilteredRecords = this.filteredRecords.map(r => 
-      r.idRecord === record.idRecord 
-        ? { ...r, stock: r.stock - 1 } 
-        : r
+
+    const updatedFilteredRecords = this.filteredRecords.map((r) =>
+      r.idRecord === record.idRecord ? { ...r, stock: r.stock - 1 } : r
     );
-    
+
     this.records = updatedRecords;
     this.filteredRecords = updatedFilteredRecords;
 
@@ -379,20 +379,18 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
       .addToCart(record)
       .pipe(
         finalize(() => (this.isAddingToCart = false)),
-        catchError(error => {
+        catchError((error) => {
           // Revert changes if there is an error
-          const revertedRecords = this.records.map(r => 
-            r.idRecord === record.idRecord 
-              ? { ...r, stock: r.stock + 1 } 
-              : r
+          const revertedRecords = this.records.map((r) =>
+            r.idRecord === record.idRecord ? { ...r, stock: r.stock + 1 } : r
           );
-          
+
           this.records = revertedRecords;
           this.filteredRecords = revertedRecords;
-          
-          this.errorMessage = error.message || "Error adding to cart";
+
+          this.errorMessage = error.message || 'Error adding to cart';
           this.visibleError = true;
-          console.error("Error adding to cart:", error);
+          console.error('Error adding to cart:', error);
           return throwError(() => error);
         })
       )
@@ -401,48 +399,48 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
           // The stock has already been updated locally
           // If the server returns a different stock, we update it
           if (updatedRecord && updatedRecord.stock !== undefined) {
-            this.records = this.records.map(r => 
-              r.idRecord === record.idRecord 
-                ? { ...r, stock: updatedRecord.stock } 
+            this.records = this.records.map((r) =>
+              r.idRecord === record.idRecord
+                ? { ...r, stock: updatedRecord.stock }
                 : r
             );
-            
-            this.filteredRecords = this.filteredRecords.map(r => 
-              r.idRecord === record.idRecord 
-                ? { ...r, stock: updatedRecord.stock } 
+
+            this.filteredRecords = this.filteredRecords.map((r) =>
+              r.idRecord === record.idRecord
+                ? { ...r, stock: updatedRecord.stock }
                 : r
             );
           }
-        }
+        },
       });
   }
 
   removeRecord(record: IRecord): void {
     if (!record.amount || this.isAddingToCart) return;
     this.isAddingToCart = true;
-    
+
     // Save the previous state so you can revert if necessary
     const prevAmount = record.amount;
-    
+
     // Update locally first for immediate response
-    const updatedRecords = this.records.map(r => 
-      r.idRecord === record.idRecord 
-        ? { 
-            ...r, 
+    const updatedRecords = this.records.map((r) =>
+      r.idRecord === record.idRecord
+        ? {
+            ...r,
             amount: Math.max(0, prevAmount - 1),
-            stock: (r.stock || 0) + 1 // Increase stock locally
-          } 
+            stock: (r.stock || 0) + 1, // Increase stock locally
+          }
         : r
     );
-    
+
     this.records = updatedRecords;
-    this.filteredRecords = this.filteredRecords.map(r => 
-      r.idRecord === record.idRecord 
-        ? { 
-            ...r, 
+    this.filteredRecords = this.filteredRecords.map((r) =>
+      r.idRecord === record.idRecord
+        ? {
+            ...r,
             amount: Math.max(0, prevAmount - 1),
-            stock: (r.stock || 0) + 1 // Increase stock locally
-          } 
+            stock: (r.stock || 0) + 1, // Increase stock locally
+          }
         : r
     );
 
@@ -454,29 +452,29 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
         }),
         catchError((error) => {
           // Revert local changes if there is an error
-          this.records = this.records.map(r => 
-            r.idRecord === record.idRecord 
-              ? { 
-                  ...r, 
+          this.records = this.records.map((r) =>
+            r.idRecord === record.idRecord
+              ? {
+                  ...r,
                   amount: prevAmount,
-                  stock: (r.stock || 0) - 1 // Reverse stock change
-                } 
+                  stock: (r.stock || 0) - 1, // Reverse stock change
+                }
               : r
           );
-          
-          this.filteredRecords = this.filteredRecords.map(r => 
-            r.idRecord === record.idRecord 
-              ? { 
-                  ...r, 
+
+          this.filteredRecords = this.filteredRecords.map((r) =>
+            r.idRecord === record.idRecord
+              ? {
+                  ...r,
                   amount: prevAmount,
-                  stock: (r.stock || 0) - 1 // Reverse stock change
-                } 
+                  stock: (r.stock || 0) - 1, // Reverse stock change
+                }
               : r
           );
-          
-          this.errorMessage = error.message || "Error removing from cart";
+
+          this.errorMessage = error.message || 'Error removing from cart';
           this.visibleError = true;
-          console.error("Error removing from cart:", error);
+          console.error('Error removing from cart:', error);
           return throwError(() => error);
         })
       )
@@ -485,24 +483,24 @@ export class ListrecordsComponent implements OnInit, OnDestroy {
           // The stock has already been updated locally
           // If the server returns a different stock, we update it
           if (updatedRecord && updatedRecord.stock !== undefined) {
-            this.records = this.records.map(r => 
-              r.idRecord === record.idRecord 
-                ? { ...r, stock: updatedRecord.stock } 
+            this.records = this.records.map((r) =>
+              r.idRecord === record.idRecord
+                ? { ...r, stock: updatedRecord.stock }
                 : r
             );
-            
-            this.filteredRecords = this.filteredRecords.map(r => 
-              r.idRecord === record.idRecord 
-                ? { ...r, stock: updatedRecord.stock } 
+
+            this.filteredRecords = this.filteredRecords.map((r) =>
+              r.idRecord === record.idRecord
+                ? { ...r, stock: updatedRecord.stock }
                 : r
             );
           }
-          
+
           // Synchronize the cart with the backend
           if (this.userEmail) {
             this.cartService.syncCartWithBackend(this.userEmail);
           }
-        }
+        },
       });
   }
 

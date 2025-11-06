@@ -1,7 +1,14 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { OrderService } from '../services/OrderService';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { OrderService } from '../services/order';
 import { Subject } from 'rxjs';
-import { IOrder } from '../EcommerceInterface';
+import { IOrder } from '../ecommerce.interface';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
@@ -9,19 +16,19 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
-    selector: 'app-admin-orders',
-    templateUrl: './AdminOrdersComponent.html',
-    styleUrls: ['./AdminOrdersComponent.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        InputTextModule,
-        DatePipe,
-        DecimalPipe
-    ]
+  selector: 'app-admin-orders',
+  templateUrl: './admin-orders.html',
+  styleUrls: ['./admin-orders.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    TableModule,
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    DatePipe,
+    DecimalPipe,
+  ],
 })
 export class AdminOrdersComponent implements OnInit, OnDestroy {
   orders: IOrder[] = [];

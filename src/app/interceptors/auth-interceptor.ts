@@ -1,17 +1,24 @@
-import { HttpHandlerFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpHandlerFn,
+  HttpRequest,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthGuard } from '../guards/AuthGuardService';
+import { AuthGuard } from '../guards/auth-guard';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
+export function authInterceptor(
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+) {
   const authGuard = inject(AuthGuard);
   const router = inject(Router);
-  
+
   // Get the token from the storage
   const token = authGuard.getToken();
-  
+
   // Clone the request and add the authorization header if the token exists
   if (token) {
     req = req.clone({

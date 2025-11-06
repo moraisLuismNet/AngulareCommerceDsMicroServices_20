@@ -3,8 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { AuthGuard } from 'src/app/guards/AuthGuardService';
-import { IGroup } from '../EcommerceInterface';
+import { AuthGuard } from 'src/app/guards/auth-guard';
+import { IGroup } from '../ecommerce.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -18,37 +18,35 @@ export class GroupsService {
 
   getGroups(): Observable<IGroup[]> {
     const headers = this.getHeaders();
-    
-    return this.http
-      .get<any>(`${this.baseUrl}groups`, { headers })
-      .pipe(
-        map((response) => {
-          // Handle different response formats
-          let groups: any[] = [];
-          
-          if (Array.isArray(response)) {
-            // If the response is already an array
-            groups = response;
-          } else if (response && typeof response === 'object') {
-            // If the response is an object with a $values property (common in .NET Core)
-            if (response.hasOwnProperty('$values')) {
-              groups = response.$values || [];
-            } else if (response.hasOwnProperty('data')) {
-              // If the response has a data property (common in some APIs)
-              groups = response.data || [];
-            } else {
-              // If it's an object but not in the expected format, try to convert it to an array
-              groups = Object.values(response);
-            }
+
+    return this.http.get<any>(`${this.baseUrl}groups`, { headers }).pipe(
+      map((response) => {
+        // Handle different response formats
+        let groups: any[] = [];
+
+        if (Array.isArray(response)) {
+          // If the response is already an array
+          groups = response;
+        } else if (response && typeof response === 'object') {
+          // If the response is an object with a $values property (common in .NET Core)
+          if (response.hasOwnProperty('$values')) {
+            groups = response.$values || [];
+          } else if (response.hasOwnProperty('data')) {
+            // If the response has a data property (common in some APIs)
+            groups = response.data || [];
+          } else {
+            // If it's an object but not in the expected format, try to convert it to an array
+            groups = Object.values(response);
           }
-          
-          return groups as IGroup[];
-        }),
-        catchError((error: any) => {
-          console.error('Error in getGroups:', error);
-          return of([]); // Return empty array on error to prevent breaking the subscription
-        })
-      );
+        }
+
+        return groups as IGroup[];
+      }),
+      catchError((error: any) => {
+        console.error('Error in getGroups:', error);
+        return of([]); // Return empty array on error to prevent breaking the subscription
+      })
+    );
   }
 
   addGroup(group: IGroup): Observable<IGroup> {
@@ -93,7 +91,6 @@ export class GroupsService {
       .get<any>(`${this.baseUrl}groups/${idGroup}`, { headers })
       .pipe(
         map((response) => {
-          
           // Handle direct group object
           if (
             response &&

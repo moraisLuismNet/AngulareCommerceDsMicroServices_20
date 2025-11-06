@@ -7,21 +7,21 @@ import {
   ChangeDetectionStrategy,
   afterNextRender,
   DestroyRef,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { Router, NavigationEnd, RouterModule } from "@angular/router";
-import { ButtonModule } from "primeng/button";
-import { MenuModule } from "primeng/menu";
-import { BadgeModule } from "primeng/badge";
-import { RippleModule } from "primeng/ripple";
-import { filter, takeUntil } from "rxjs/operators";
-import { Subject } from "rxjs";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { MenuModule } from 'primeng/menu';
+import { BadgeModule } from 'primeng/badge';
+import { RippleModule } from 'primeng/ripple';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
-import { UserService } from "src/app/services/UserService";
-import { CartService } from "src/app/ecommerce/services/CartService";
+import { UserService } from 'src/app/services/user';
+import { CartService } from 'src/app/ecommerce/services/cart';
 
 @Component({
-  selector: "app-navbar",
+  selector: 'app-navbar',
   standalone: true,
   imports: [
     CommonModule,
@@ -31,7 +31,7 @@ import { CartService } from "src/app/ecommerce/services/CartService";
     BadgeModule,
     RippleModule,
   ],
-  templateUrl: "./NavbarComponent.html",
+  templateUrl: './navbar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent implements OnInit, OnDestroy {
@@ -46,7 +46,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   role: string | null = null;
   cartItemsCount = 0;
   cartTotal = 0;
-  currentRoute = "";
+  currentRoute = '';
   cartEnabled = true;
 
   // Private properties
@@ -74,69 +74,69 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // Navigation helper methods
   isAdmin(): boolean {
-    return this.role === "Admin";
+    return this.role === 'Admin';
   }
 
   isListGroupsPage(): boolean {
     return (
-      this.currentRoute.includes("/listgroups") || this.currentRoute === "/"
+      this.currentRoute.includes('/listgroups') || this.currentRoute === '/'
     );
   }
 
   isOrdersPage(): boolean {
     return (
-      this.currentRoute.includes("/admin-orders") ||
-      this.currentRoute.includes("/orders")
+      this.currentRoute.includes('/admin-orders') ||
+      this.currentRoute.includes('/orders')
     );
   }
 
   isGenresPage(): boolean {
     return (
-      this.currentRoute.includes("/genres") || this.currentRoute === "/genres"
+      this.currentRoute.includes('/genres') || this.currentRoute === '/genres'
     );
   }
 
   isGroupsPage(): boolean {
     return (
-      this.currentRoute.includes("/groups") || this.currentRoute === "/groups"
+      this.currentRoute.includes('/groups') || this.currentRoute === '/groups'
     );
   }
 
   isRecordsPage(): boolean {
     return (
-      this.currentRoute.includes("/records") || this.currentRoute === "/records"
+      this.currentRoute.includes('/records') || this.currentRoute === '/records'
     );
   }
 
   isCartsPage(): boolean {
     return (
-      this.currentRoute.includes("/carts") || this.currentRoute === "/carts"
+      this.currentRoute.includes('/carts') || this.currentRoute === '/carts'
     );
   }
 
   isUsersPage(): boolean {
     return (
-      this.currentRoute.includes("/users") || this.currentRoute === "/users"
+      this.currentRoute.includes('/users') || this.currentRoute === '/users'
     );
   }
 
   isLoginPage(): boolean {
     return (
-      this.currentRoute === "/login" || this.currentRoute.includes("/login")
+      this.currentRoute === '/login' || this.currentRoute.includes('/login')
     );
   }
 
   logout(): void {
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("role");
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('role');
     this.userService.clearUser();
     this.cartService.resetCart();
-    this.router.navigate(["/login"]);
+    this.router.navigate(['/login']);
   }
 
   // Private methods
   private updateCartEnabledState(): void {
-    const disabledRoutes = ["/login", "/register"];
+    const disabledRoutes = ['/login', '/register'];
     const wasEnabled = this.cartEnabled;
     this.cartEnabled = !disabledRoutes.some((route) =>
       this.currentRoute.startsWith(route)
@@ -170,7 +170,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateToCart(): void {
     if (this.cartEnabled) {
-      this.router.navigate(["/cart-details"]);
+      this.router.navigate(['/cart-details']);
     }
   }
 
