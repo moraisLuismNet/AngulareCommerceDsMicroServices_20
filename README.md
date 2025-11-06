@@ -7,7 +7,7 @@
 AngulareCommerceDsMicroServices_20/  
 ├───app/  
 │   ├───ecommerce/  
-│   │   ├───Admin-orders/  
+│   │   ├───admin-orders/  
 │   │   │   ├───admin-orders.css  
 │   │   │   ├───admin-orders.html  
 │   │   │   └───admin-orders.ts  
